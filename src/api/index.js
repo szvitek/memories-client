@@ -4,6 +4,17 @@ import axios from 'axios';
 const baseURL = process.env.REACT_APP_API_URL;
 const API = axios.create({ baseURL });
 
+// attach token to the req header
+API.interceptors.request.use(req => {
+	const profile = localStorage.getItem('memories_profile');
+	if (profile) {
+		const { token } = JSON.parse(profile);
+		req.headers.Authorization = `Bearer ${token}`;
+	}
+
+	return req;
+})
+
 //POSTS
 export const fetchPosts = () => API.get('/posts');
 export const createPost = newPost => API.post('/posts', newPost);

@@ -8,7 +8,6 @@ import { createPost, updatePost } from '../../actions/posts';
 
 function Form({ currentId, setCurrentId }) {
 	const emptyPost = {
-		creator: '',
 		title: '',
 		message: '',
 		tags: '',
@@ -18,6 +17,7 @@ function Form({ currentId, setCurrentId }) {
 	const [postData, setPostData] = useState({ ...emptyPost });
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const user = JSON.parse(localStorage.getItem('memories_profile'));
 
 	useEffect(() => {
 		if (post) setPostData(post);
@@ -26,10 +26,12 @@ function Form({ currentId, setCurrentId }) {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
+		const newPost = { ...postData, name: user?.result?.name };
+
 		if (currentId) {
-			dispatch(updatePost(currentId, postData));
+			dispatch(updatePost(currentId, newPost));
 		} else {
-			dispatch(createPost(postData))
+			dispatch(createPost(newPost));
 		}
 
 		clear();
@@ -42,18 +44,20 @@ function Form({ currentId, setCurrentId }) {
 
 	const formTitle = currentId ? 'Edit memory' : 'Creating a Memory';
 
+	if (!user?.result?.name) {
+		return (
+			<Paper className={classes.paper}>
+				<Typography variant="h6" align="center">
+					Please Sign In to create your own memories and like others' memories.
+				</Typography>
+			</Paper>
+		);
+	}
+
 	return (
 		<Paper className={classes.paper}>
 			<form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
 				<Typography variant="h6">{formTitle}</Typography>
-				<TextField
-					name="creator"
-					variant="outlined"
-					label="Creator"
-					fullWidth
-					value={postData.creator}
-					onChange={(e) => setPostData({ ...postData, creator: e.target.value })}
-				/>
 				<TextField
 					name="title"
 					variant="outlined"
